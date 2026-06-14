@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "package": "buildcraft.lib.fabric.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "LevelMixin",
+    "ShapelessRecipeAccessor"
+  ],
+  "client": [
+    "client.ItemTintSourcesBootstrapMixin",
+    "client.GhostSlotsInvokerMixin",
+    "client.ClientLevelParticleMixin",
+    "client.LevelRendererMixin",
+    "client.GuiGraphicsExtractorAccessor",
+    "client.ModelManagerMixin",
+    "client.GameRendererPipMixin",
+    "client.FogRendererBcFluidMixin",
+    "client.CameraBcFluidMixin",
+    "client.ScreenEffectRendererBcFluidMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

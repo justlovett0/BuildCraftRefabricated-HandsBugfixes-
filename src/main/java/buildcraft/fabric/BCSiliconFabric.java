@@ -1,0 +1,104 @@
+package buildcraft.fabric;
+
+import buildcraft.lib.mj.MjBlockCapabilities;
+import buildcraft.silicon.BCSiliconBlockEntities;
+import buildcraft.silicon.BCSiliconBlocks;
+import buildcraft.silicon.BCSiliconCreativeTabs;
+import buildcraft.silicon.BCSiliconEntities;
+import buildcraft.silicon.BCSiliconItems;
+import buildcraft.silicon.BCSiliconMenuTypes;
+import buildcraft.silicon.BCSiliconPlugs;
+import buildcraft.silicon.BCSiliconRecipeSerializers;
+import buildcraft.silicon.BCSiliconStatements;
+import buildcraft.silicon.tile.TileAdvancedCraftingTable;
+import buildcraft.silicon.tile.TileAssemblyTable;
+import buildcraft.silicon.tile.TileChargingTable;
+import buildcraft.silicon.tile.TileIntegrationTable;
+import buildcraft.silicon.tile.TileLaser;
+import buildcraft.silicon.tile.TileLaserTableBase;
+import buildcraft.silicon.tile.TilePackager;
+import buildcraft.silicon.tile.TileProgrammingTable;
+import buildcraft.silicon.tile.TileStampingTable;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import team.reborn.energy.api.EnergyStorage;
+
+public final class BCSiliconFabric {
+   private BCSiliconFabric() {
+   }
+
+   public static void register() {
+      BCSiliconPlugs.preInit();
+      BCSiliconStatements.preInit();
+      FabricModuleBootstrap.registerContent(
+         BCSiliconBlocks::register,
+         BCSiliconItems::register,
+         BCSiliconBlockEntities::register,
+         BCSiliconMenuTypes::register
+      );
+      BCSiliconEntities.register();
+      BCSiliconRecipeSerializers.register();
+      BCSiliconCreativeTabs.register();
+      FabricModuleBootstrap.registerCapabilities(BCSiliconFabric::registerMjCapabilities, BCSiliconFabric::registerNativeTransfer);
+   }
+
+   private static void registerNativeTransfer() {
+      EnergyStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileLaser laser ? laser.getSidedEnergyStorage() : null, BCSiliconBlockEntities.LASER
+         );
+      registerLaserTableEnergy(BCSiliconBlockEntities.ASSEMBLY_TABLE);
+      registerLaserTableEnergy(BCSiliconBlockEntities.ADVANCED_CRAFTING_TABLE);
+      registerLaserTableEnergy(BCSiliconBlockEntities.INTEGRATION_TABLE);
+      registerLaserTableEnergy(BCSiliconBlockEntities.CHARGING_TABLE);
+      registerLaserTableEnergy(BCSiliconBlockEntities.PROGRAMMING_TABLE);
+      registerLaserTableEnergy(BCSiliconBlockEntities.STAMPING_TABLE);
+      ItemStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileAssemblyTable table ? table.getSidedItemStorage(direction) : null,
+            BCSiliconBlockEntities.ASSEMBLY_TABLE
+         );
+      ItemStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileAdvancedCraftingTable table ? table.getSidedItemStorage(direction) : null,
+            BCSiliconBlockEntities.ADVANCED_CRAFTING_TABLE
+         );
+      ItemStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileIntegrationTable table ? table.getSidedItemStorage(direction) : null,
+            BCSiliconBlockEntities.INTEGRATION_TABLE
+         );
+      ItemStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileChargingTable table ? table.getSidedItemStorage(direction) : null,
+            BCSiliconBlockEntities.CHARGING_TABLE
+         );
+      ItemStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileProgrammingTable table ? table.getSidedItemStorage(direction) : null,
+            BCSiliconBlockEntities.PROGRAMMING_TABLE
+         );
+      ItemStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileStampingTable table ? table.getSidedItemStorage(direction) : null,
+            BCSiliconBlockEntities.STAMPING_TABLE
+         );
+      ItemStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TilePackager packager ? packager.getSidedItemStorage(direction) : null,
+            BCSiliconBlockEntities.PACKAGER
+         );
+   }
+
+   private static void registerLaserTableEnergy(BlockEntityType<? extends TileLaserTableBase> type) {
+      EnergyStorage.SIDED
+         .registerForBlockEntity(
+            (blockEntity, direction) -> blockEntity instanceof TileLaserTableBase table ? table.getSidedEnergyStorage() : null, type
+         );
+   }
+
+   private static void registerMjCapabilities() {
+      MjBlockCapabilities.registerReceiver(BCSiliconBlockEntities.LASER, (laser, direction) -> laser.getMjReceiver());
+      MjBlockCapabilities.registerConnector(BCSiliconBlockEntities.LASER, (laser, direction) -> laser.getMjReceiver());
+   }
+}
