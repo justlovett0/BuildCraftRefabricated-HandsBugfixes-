@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ItemWrench_Neptune extends Item implements IToolWrench {
    private static final Identifier ADVANCEMENT = Identifier.parse("buildcraftcore:wrenched");
@@ -74,20 +75,46 @@ public class ItemWrench_Neptune extends Item implements IToolWrench {
       }
    }
 
+   @Override
    public InteractionResult useOn(UseOnContext context) {
-      if (context.getPlayer() != null && context.getPlayer().isShiftKeyDown()) {
-         InteractionResult sneak = this.trySneakRotate(context.getItemInHand(), context);
-         if (sneak != InteractionResult.PASS) {
-            return sneak;
-         }
-      }
-
       Level world = context.getLevel();
       BlockPos pos = context.getClickedPos();
       Player player = context.getPlayer();
       InteractionHand hand = context.getHand();
       Direction side = context.getClickedFace();
       BlockState state = world.getBlockState(pos);
+
+      if (player != null && player.isShiftKeyDown()) {
+         InteractionResult sneak = this.trySneakRotate(context.getItemInHand(), context);
+         if (sneak != InteractionResult.PASS) {
+            return sneak;
+         }
+      }
+
+      Identifier blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+      if (blockId != null
+         && blockId.getNamespace().startsWith("buildcraft")
+         && blockId.getPath().contains("pipe")) {
+         return InteractionResult.PASS;
+         }
+	  if (!world.isClientSide()
+         && player != null
+         && blockId != null
+         && blockId.getNamespace().startsWith("buildcraft")) {
+
+         ItemStack drop = new ItemStack(state.getBlock().asItem());
+         if (!drop.isEmpty()) {
+            Block.popResource(world, pos, drop);
+         }
+
+         world.removeBlock(pos, false);
+
+         BlockHitResult hitResult = new BlockHitResult(context.getClickLocation(), side, pos, context.isInside());
+         this.wrenchUsed(player, hand, context.getItemInHand(), hitResult);
+
+         return InteractionResult.SUCCESS;
+      }
+
       InteractionResult result = CustomRotationHelper.INSTANCE.attemptRotateBlock(world, pos, state, side);
       if (result == InteractionResult.SUCCESS && player != null) {
          BlockHitResult hitResult = new BlockHitResult(context.getClickLocation(), side, pos, context.isInside());
@@ -97,4 +124,5 @@ public class ItemWrench_Neptune extends Item implements IToolWrench {
       SoundUtil.playSlideSound(world, pos, state, result);
       return result;
    }
+
 }
