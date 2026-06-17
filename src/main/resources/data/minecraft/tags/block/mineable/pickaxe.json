@@ -12,7 +12,7 @@
     "buildcraftenergy:engine_stone",
     "buildcraftenergy:engine_iron",
     { "id": "buildcraftenergy:engine_rf", "required": false },
-    { "id": "buildcraftenergy:mj_dynamo", "required": false }
+    { "id": "buildcraftenergy:mj_dynamo", "required": false },
     "buildcraftfactory:autoworkbench_item",
     { "id": "buildcraftfactory:autoworkbench_fluid", "required": false },
     "buildcraftfactory:mining_well",
