@@ -3,6 +3,7 @@ import java.util.zip.ZipFile
 import javax.imageio.ImageIO
 
 plugins {
+    java
     id("net.fabricmc.fabric-loom") version "1.16-SNAPSHOT"
 }
 
@@ -403,7 +404,7 @@ tasks.withType<Jar>().configureEach {
 }
 
 tasks.named<Jar>("sourcesJar") {
-    dependsOn("runDatagen")
+    dependsOn("generateFluidBucketAssets")
 }
 
 tasks.named<Test>("test") {
@@ -411,14 +412,18 @@ tasks.named<Test>("test") {
     jvmArgs("--sun-misc-unsafe-memory-access=allow")
 }
 
-/** Always rebuild from scratch so stale build/resources (e.g. regenerated fluid PNGs) never linger in the JAR. */
+/** Clean run directories along with normal Gradle build outputs. */
 tasks.named("clean") {
     delete(layout.projectDirectory.dir("run"))
     delete(layout.projectDirectory.dir("run_server"))
 }
 
-tasks.named("build") {
-    dependsOn("clean")
+/** Optional full rebuild task. Use `gradlew cleanBuild` when you want clean + build. */
+tasks.register("cleanBuild") {
+    group = "build"
+    description = "Runs clean and then build."
+    dependsOn("clean", "build")
+    tasks.named("build").configure { mustRunAfter("clean") }
 }
 
 /** Unpack Mojang / Fabric API / Loom artifacts into .gradle/api-explore for local API browsing. */
